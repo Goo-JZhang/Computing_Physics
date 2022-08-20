@@ -1,0 +1,12 @@
+When Lambda=500 , the result is 1.07942
+When Lambda=1000 , the result is 1.09745
+When Lambda=1500 , the result is 1.09548
+When Lambda=2000 , the result is 1.09856
+When Lambda=2500 , the result is 1.10162
+When Lambda=3000 , the result is 1.09957
+When Lambda=3500 , the result is 1.10176
+When Lambda=4000 , the result is 1.10005
+When Lambda=4500 , the result is 1.10355
+When Lambda=5000 , the result is 1.10351
+When Lambda=5500 , the result is 1.10347
+When Lambda=6000 , the result is 1.1018

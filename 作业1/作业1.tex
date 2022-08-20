@@ -1,0 +1,574 @@
+%!TEX program = pdflatex
+\documentclass[UTF8]{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{yhmath}
+\usepackage{esvect}
+\usepackage{arcs}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{MnSymbol}
+\usepackage{diagbox}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{longtable}
+\usepackage[justification=centering]{caption}
+\geometry{left=2.0cm,right=2.0cm,top=2cm,bottom=2cm}
+\newcommand*{\dif}{\mathop{}\!\mathrm{d}}
+\newcommand*{\C}{^{\circ}\mathrm{C}}
+\pagestyle{plain}
+
+\begin{document}
+
+\title{计算物理作业1}
+\author{姓名：张健霖\\学号: \texttt{1900011327}}
+\maketitle
+
+\section{舍入误差的稳定性}
+
+\noindent\textbf{(a)}
+
+定义运算$\oplus$：$x\oplus y=fl[fl(x)+fl(y)]$，其中$fl(x)$为实数$x$的浮点数表示，并有$fl(x)=x(1+\delta_x)$，其中$0\leq\delta_x\leq\frac{\epsilon_M}{2}$
+
+记$S_k=\sum_{i=1}^k x_i$，$S'_k=S'_{k-1}\oplus x_{k}$，其中$S'_1=fl(x_1)$
+
+算法舍入误差记为$\epsilon_k$，即$S'_k=S_k(1+\epsilon_k)$
+
+于是可以得到
+$$
+\begin{aligned}
+S'_{k+1}&=S'_{k}\oplus x_{k+1}\\
+&=[S_k(1+\epsilon_k)+x_{k+1}(1+\delta_{x_{k+1}})](1+\delta_{S_{k+1}})\\
+&=S_{k+1}\Big(1+\frac{S_k}{S_{k+1}}\epsilon_k+\frac{x_{k+1}}{S_{k+1}}\delta_{x_{k+1}}+\delta_{S_{k+1}}\Big)
+\end{aligned}
+$$
+
+此处已舍去高阶项，从而
+$$\epsilon_{k+1}=\frac{S_k}{S_{k+1}}\epsilon_k+\frac{x_{k+1}}{S_{k+1}}\delta_{x_{k+1}}+\delta_{S_{k+1}}$$，作为上限估计，我们可以得到
+
+$$|\epsilon_{k+1}|\sim |\epsilon_k|+\epsilon_{M}$$
+
+从而$|\epsilon_N|\sim N\epsilon_M$
+
+$$\bar{x'}=fl(\frac{S'_N}{N})=\frac{S_N}{N}(1+\epsilon_N+\delta_{\bar{x'}})=\bar{x}(1+\epsilon_N+\delta_{\bar{x'}})$$
+
+从而$\bar{x}$的一个误差上限为$\bar{\epsilon}=(N+\frac{1}{2})\epsilon_M\approx N\epsilon_M$
+
+~\
+
+\noindent\textbf{(b)}
+
+\begin{equation}\label{1-b-1}
+S^2=\frac{1}{N-1}\Big(\sum_{i=1}^N x_i^2-N\bar{x}^2\Big)
+\end{equation}
+共做了$N+1$次加减法，$N+1$次乘法以及$1$次除法.
+
+\begin{equation}\label{1-b-2}
+S^2=\frac{1}{N-1}\sum_{i=1}^N (x_i-\bar{x})^2
+\end{equation}
+共做了$2N$次加减法，$N$次乘法以及$1$次除法.
+
+在运算次数上\eqref{1-b-1}优于\eqref{1-b-2}，从而\eqref{1-b-1}稳定性和准确性
+较\eqref{1-b-2}更好
+
+~\
+
+\noindent\textbf{(c)}
+
+\begin{equation}\label{1-c-1}
+I_0=\int_0^1\frac{1}{x+5}\dif x=\ln(x+5)\Big|_0^1=\ln\frac{6}{5}
+\end{equation}
+
+\begin{equation}\label{1-c-2}
+5I_k+I_{k+1}=\int_0^1\frac{5x^k+x^{k+1}}{x+5}\dif x=\int_0^1 x^k\dif=\frac{1}{k}
+\end{equation}
+得证.
+
+不考虑舍入误差的情况下，记$I_k$的相对误差为$\epsilon_k$，代入\eqref{1-c-2}得到
+
+\begin{equation}\label{1-c-3}
+5I_k(1+\epsilon_k)+I_{k+1}(1+\epsilon_{k+1})=\frac{1}{k}=5I_k+I_{k+1}
+\end{equation}
+
+利用$I_k>I_{k+1},\ k=0,1,2\cdots$这一事实并化简
+\begin{equation}\label{1-c-4}
+\epsilon_k=(-5)\frac{I_{k-1}}{I_k}\epsilon_{k-1}\ \rightarrow\ |\epsilon_{k}|>(5)^{k-1}|\epsilon|
+\end{equation}
+相对误差呈指数级放大，故而当$n\gg 1$时$I_n$是不稳定的.
+
+\section{矩阵的模与条件数}
+
+\noindent\textbf{(a)}
+
+$$A=
+\left(
+    \begin{array}{ccccccc}
+        1 & -1 & -1 & \cdots & -1 & -1 & -1\\
+        0 & 1  & -1 & \cdots & -1 & -1 & -1\\
+        0 & 0  & 1  & \cdots & -1 & -1 & -1\\
+        \vdots & & & \ddots & & & \vdots \\
+        0 & 0  & 0  & \cdots & 1  & -1 & -1\\
+        0 & 0  & 0  & \cdots & 0  & 1  & -1\\
+        0 & 0  & 0  & \cdots & 0  & 0  & 1\\
+    \end{array}
+\right)
+$$
+
+由于$A$是上三角的，从而$A$的行列式值为对角元之积.
+
+\begin{equation}\label{2-a-1}
+    \det(A)=1
+\end{equation}
+
+~\
+
+\noindent\textbf{(b)}
+
+假定$A^{-1}$具有上三角的形式
+$$
+A^{-1}=
+\left(
+    \begin{array}{ccccccc}
+        a_{1,1} & a_{1,2} & a_{1,3} & \cdots & a_{1,n-2} & a_{1,n-1} & a_{1,n}\\
+        0 & a_{2,2} & a_{2,3} & \cdots & a_{2,n-2} & a_{2,n-1} & a_{2,n}\\
+        0 & 0 & a_{3,3} & \cdots & a_{3,n-2} & a_{3,n-1} & a_{3,n}\\
+        \vdots & & & \ddots & & & \vdots \\
+        0 & 0 & 0 & \cdots & a_{n-2,n-2}  & a_{n-2.n-1} & a_{n-2,n}\\
+        0 & 0 & 0 & \cdots & 0  & a_{n-1,n-1} & a_{n-1,n}\\
+        0 & 0 & 0 & \cdots & 0  & 0 & a_{n,n}\\
+    \end{array}
+\right)
+$$
+
+\begin{equation}\label{2-b-1}
+AA^{-1}=1\ \rightarrow\ (AA^{-1})_{ij}=\delta_{ij}
+\end{equation}
+
+又
+\begin{equation}\label{2-b-2}
+(AA^{-1})_{ij}=
+\left\{
+\begin{aligned}
+    &a_{j,i}-\sum_{k=i+1}^j a_{j,k} & i<j\\
+    &a_{j,j} & i=j\\
+    &0 & i>j
+\end{aligned}
+\right.
+\end{equation}
+于是有
+\begin{equation}\label{2-b-3}
+\left\{
+\begin{aligned}
+    &a_{j,j}&=1\\
+    &a_{j,j-1}-a_{j,j}&=0\\
+    &a_{j,j-2}-a_{j,j-1}-a_{j,j}&=0\\
+    &\cdots\\
+    &a_{j,1}-\sum_{k=2}^j a_{j,k}&=0
+\end{aligned}
+\right.
+\end{equation}
+化简得到
+\begin{equation}\label{2-b-4}
+a_{j,k}=2a_{j,k+1},\ \ \ \ k=1,2,\cdots,j-2
+\end{equation}
+进而
+\begin{equation}\label{2-b-5}
+a_{j,k}=
+\left\{
+    \begin{aligned}
+        &1 &\ \ j=k\\
+        &2^{j-1-k}&\ \ k\leq j-1
+    \end{aligned}
+\right.
+\end{equation}
+即得到
+
+\begin{equation}\label{2-b-6}
+A^{-1}=
+\left(
+\begin{array}{ccccccc}
+    1 & 1 & 2 & \cdots & 2^{n-4} & 2^{n-3} & 2^{n-2}\\
+    0 & 1 & 1 & \cdots & 2^{n-5}& 2^{n-4} & 2^{n-3}\\
+    0 & 0 & 1 & \cdots & 2^{n-6} & 2^{n-5} & 2^{n-4}\\
+    \vdots & & & \ddots & & & \vdots \\
+    0 & 0 & 0 & \cdots & 1  & 1 & 2\\
+    0 & 0 & 0 & \cdots & 0  & 1 & 1\\
+    0 & 0 & 0 & \cdots & 0  & 0 & 1\\
+\end{array}
+\right)
+\end{equation}
+
+~\
+
+\noindent\textbf{(c)}
+$$
+\mathbf{x}=(x_1,x_2,\cdots,x_n)^\mathrm{T}
+$$
+
+\begin{equation}\label{2-c-1}
+\begin{aligned}
+\lim_{p\rightarrow\infty} ||\mathbf{x}||_p&=\lim_{p\rightarrow\infty}\Big(\sum_{i=1}^n|x_i|^p\Big)^\frac{1}{p}\\
+&=\lim_{p\rightarrow\infty}|x_t|\Big(\sum_{i=1}^n|\frac{x_i}{x_t}|^p\Big)^\frac{1}{p}
+\end{aligned}
+\end{equation}
+其中$|x_t|=\max_{i=1,2,\cdots,n}{|x_i|}\neq 0$，且有
+
+\begin{equation}\label{2-c-2}
+    1\leq\sum_{i=1}^n|\frac{x_i}{x_t}|^p\leq n
+\end{equation}
+故而
+\begin{equation}\label{2-c-3}
+\begin{aligned}
+||\mathbf{x}||_\infty=\lim_{p\rightarrow\infty} ||\mathbf{x}||_p&=\max_{i=1,2,\cdots,n}{|x_i|}
+\end{aligned}
+\end{equation}
+
+同理
+\begin{equation}\label{2-c-4}
+\lim_{p\rightarrow\infty}||A\mathbf{x}||_p=\max_{i=1,2,\cdots,n}\Big|\sum_{j=1}^n a_{i,j}x_j\Big|
+\end{equation}
+
+\begin{equation}\label{2-c-5}
+\begin{aligned}
+\lim_{p\rightarrow\infty}||A||_p&=\sup\frac{\max_{i=1,2,\cdots,n}\Big|\sum_{j=1}^n a_{i,j}x_j\Big|}{\max_{i=1,2,\cdots,n}{|x_i|}}\\
+&=\sup\max_{i=1,2,\cdots,n}\Big|\sum_{j=1}^n a_{i,j}\frac{x_j}{x_t}\Big|\\
+&=\max_{i=1,2,\cdots,n}\sum_{j=1}^n|a_{i,j}|
+\end{aligned}
+\end{equation}
+
+第三个等号可以取到，只需选取$x_i$使得$a_{i,j}\frac{x_j}{x_t}$与$a_{i,t}$同相位，且$|x_j|=|x_t|$即可.
+
+~\
+
+\noindent\textbf{(d)}
+
+$U$是幺正矩阵，其行向量构成$\mathbb{C}^{\mathrm{1\times n}}$上的一组完备正交基，将其写为
+$$
+U=
+\left(
+    \begin{array}{c}
+        \mathbf{v}_1^\dagger \\
+        \mathbf{v}_2^\dagger \\
+        \vdots\\
+        \mathbf{v}_n^\dagger \\
+    \end{array}
+\right)
+,\ \ 
+\mathbf{v}_i^\dagger=(u_{i,1},u_{i,2},\cdots,u_{i,n}),\ i=1,2,\cdots,n.
+$$
+且其行向量的共轭转置同样构成$\mathbb{C}^{\mathrm{n\times 1}}$上的一组完备正交基$\mathbf{v}_i\ i=1,2,\cdots,n.$
+$$
+\mathbf{v}_i=(u_{i,1}^*,u_{i,2}^*,\cdots,u_{i,n}^*)^\mathrm{T}
+$$
+满足
+$$\mathbf{v}_i^\dagger\mathbf{v}_j=\delta_{ij}$$
+
+$\mathbb{C}^{\mathrm{n\times 1}}$上任意向量$\mathbf{x}$可写为
+$$
+\mathbf{x}=\sum_{i=1}^n c_i\mathbf{v}_i
+$$
+且
+$$
+||\mathbf{x}||_2=\sqrt{\sum_{i=1}^n|x_i|^2}=\sqrt{\mathbf{x}^\dagger\mathbf{x}}=\sqrt{\sum_{i=1}^n|c_i|^2}
+$$
+
+\begin{equation}\label{2-d-1}
+\begin{aligned}
+||U||_2&=\sup_{\mathbf{x}\neq \mathbf{0}}\frac{||U\mathbf{x}||_2}{||\mathbf{x}||_2}\\
+&=\sup_{\mathbf{x}\neq \mathbf{0}}\frac{||(c_1,c_2,\cdots,c_n)^\mathrm{T}||)_2}{\sqrt{\sum_{i=1}^n|c_i|^2}}\\
+&=\sup_{\mathbf{x}\neq \mathbf{0}}\frac{\sqrt{\sum_{i=1}^n|c_i|^2}}{\sqrt{\sum_{i=1}^n|c_i|^2}}=1
+\end{aligned}
+\end{equation}
+
+由$U$幺正可知$U^\dagger$也是幺正矩阵，于是
+\begin{equation}\label{2-d-2}
+||U^\dagger||_2=1
+\end{equation}
+
+从\eqref{2-d-1}已知
+\begin{equation}\label{2-d-3}
+    ||U\mathbf{x}||_2=||\mathbf{x}||_2
+\end{equation}
+
+因此
+\begin{equation}\label{2-d-4}
+    \begin{aligned}
+    ||A||_2&=\sup_{\mathbf{x}\neq 0}\frac{||A\mathbf{x}||_2}{||\mathbf{x}||_2}\\
+    &=\sup_{\mathbf{x}\neq 0}\frac{||UA\mathbf{x}||_2}{||\mathbf{x}||_2}\\
+    &=||UA||_2
+    \end{aligned}
+\end{equation}
+
+\begin{equation}\label{2-d-5}
+\begin{aligned}
+    ||A^{-1}U^\dagger||_2=\sup_{\mathbf{x}\neq 0}\frac{||A^{-1}U^\dagger\mathbf{x}||_2}{||\mathbf{x}||_2}\\
+    &=\sup_{\mathbf{x}\neq 0}\frac{||A^{-1}U^\dagger\mathbf{x}||_2}{||U^\dagger\mathbf{x}||_2}\\
+    &=\sup_{\mathbf{y}\neq 0}\frac{||A^{-1}\mathbf{y}||_2}{||\mathbf{y}||_2}\\
+    &=||A^{-1}||_2
+\end{aligned}
+\end{equation}
+
+于是
+
+\begin{equation}\label{2-d-6}
+    K_2(UA)=||UA||_2||A^{-1}U^\dagger||_2=||A||_2||A^{-1}||_2=U(A)
+\end{equation}
+
+证毕.
+
+~\
+
+\noindent\textbf{(e)}
+$$K_p(A)=||A^{-1}||_p||A||_p$$
+
+\begin{equation}\label{2-e-1}
+||A||_\infty=\max_{i=1,2,\cdots,n}\sum_{j=1}^n|A_{i,j}|=n
+\end{equation}
+
+\begin{equation}\label{2-e-2}
+||A^{-1}||_\infty=\max_{i=1,2,\cdots,n}\sum_{j=1}^n|A^{-1}_{i,j}|=2^{n-1}
+\end{equation}
+
+\begin{equation}\label{2-e-3}
+K_\infty(A)=n2^{n-1}
+\end{equation}
+
+\section{Hilbert矩阵}
+
+\noindent\textbf{(a)}
+
+$$D=\int_0^1 \dif x\Big(\sum_{c_ix^{i-1}}-f(x)\Big)^2$$的极值要求
+$$\frac{\partial D}{\partial c_i}=0,\ i=1,2,\cdots,n$$
+
+\begin{equation}\label{3-a-1}
+\begin{aligned}
+\frac{\partial D}{\partial c_i}&=\frac{\partial}{\partial c_i}\int_0^1 \dif x\Big(\sum_{k=1}^nc_kx^{k-1}-f(x)\Big)^2\\
+&=\int_0^1 2x^{i-1}\Big(\sum_{k=1}^nc_kx^{k-1}-f(x)\Big)\dif x\\
+&=2\Big(\sum_{k=1}^n\frac{c_k}{i+k-1}-\int_0^1 x^{i-1}f(x)\dif x\Big)=0
+\end{aligned}
+\end{equation}
+
+于是有
+\begin{equation}\label{3-a-2}
+\sum_{k=1}^n\frac{c_k}{i+k-1}=\int_0^1 x^{i-1}f(x)\dif x
+\end{equation}
+
+记$$(H_n)_{ij}=\frac{1}{i+j-1},\ \ b_i=\int_0^1 x^{i-1}f(x)\dif x$$
+
+即可将\eqref{3-a-2}写为
+
+\begin{equation}\label{3-a-3}
+\sum_{j=1}^n (H_n)_{ij}c_j=b_i
+\end{equation}
+
+~\
+
+\noindent\textbf{(b)}
+
+记$$\mathbf{c}=(c_1,c_2,\cdots,c_n)^\mathrm{T}$$
+
+于是
+
+\begin{equation}\label{3-b-1}
+\begin{aligned}
+\mathbf{c}^\mathrm{T}H_n\mathbf{c}&=\sum_{i,j}c_i(H_n)_{ij}c_j\\
+&=\sum_{i,j}\frac{c_ic_j}{i+j-1}\\
+&=\sum_{i,j}c_ic_j\int_0^1 t^{i+j-2}\dif t\\
+&=\int_0^1\Big(\sum_{i}c_i x^{i-1}\Big)^1\geq 0
+\end{aligned}
+\end{equation}
+
+可以观察到当且仅当$\mathbf{c}=\mathbf{0}$时，$\mathbf{c}^\mathrm{T}H_n\mathbf{c}=0$
+
+若$H_n$奇异，即$\det(H_n)=0$，说明$H_n$的列向量线性相关，即存在某个非零的$\mathbf{c}_0$使得
+
+$$H_n\mathbf{c}_0=0$$
+从而有
+$$\mathbf{c}_0^\mathrm{T}H_n\mathbf{c}_0=0$$
+
+与$H_n$正定相矛盾，故而$H_n$非奇异.
+
+~\
+
+\noindent\textbf{(c)}
+
+利用$$\det(H_n)=\frac{c_n^4}{c_{2n}},\ \ \ \ c_n=\prod_{i=0}^{n-1}i!$$
+
+和斯特林公式
+$$\ln n!\approx \ln\sqrt{2\pi}+(n+\frac{1}{2})\ln n-n$$
+
+从而
+\begin{equation}\label{3-c-1}
+    \begin{aligned}
+        \ln c_n&=\sum_{i=0}^{n-1}\ln i!\\
+        &\approx (n-1)\ln\sqrt{2\pi}+\sum_{i=1}^{n-1}(i+\frac{1}{2})\ln i-\frac{n(n-1)}{2}
+    \end{aligned}
+\end{equation}
+
+\begin{equation}\label{3-c-2}
+    \begin{aligned}
+    \ln(\det(H_n))&=\ln\frac{c_n^4}{c_{2n}}\\
+    &=4\ln c_n-\ln c_{2n}\\
+    &\approx(2n-3)\ln\sqrt{2\pi}-2n(n-1)+n(2n-1)+\sum_{i=1}^{n-1}(4i+2)\ln i-\sum_{i=1}^{2n-1}(i+\frac{1}{2})\ln i\\
+    &\approx(2n-3)\ln\sqrt{2\pi}+n+\sum_{i=1}^{n-1}3(i+\frac{1}{2})\ln i-\sum_{i=n}^{2n-1}(i+\frac{1}{2})\ln i\\
+    &\approx(2n-3)\ln\sqrt{2\pi}+n+4\int_1^{n-1}(x+\frac{1}{2})\ln x\dif x-\int_{1}^{2n-1}(x+\frac{1}{2})\ln x\dif x\\
+    &=(2n-3)\ln\sqrt{2\pi}+n+2n(n-1)\ln(n-1)-n^2+1+3-n(2n-1)\ln(2n-1)+\frac{4n^2-1}{4}-\frac{3}{4}\\
+    &\approx -2n^2\ln 2
+    \end{aligned}
+\end{equation}
+
+此处只取$n$的最高阶项
+
+\begin{equation}\label{3-c-3}
+    \det(H_n)\sim 4^{-n^2}
+\end{equation}
+
+~\
+
+\noindent\textbf{(d)}
+
+源代码以及原始结果见附件，此处只给出解与严格解差的值，其中严格解由Matlab给出.
+
+\begin{table}[H]
+\centering
+\caption{不同方法解的对比，写为行向量的形式，只四舍五入保留到最高的误差位}\label{t1}
+\begin{tabular}{|c|c|c|c|}
+\hline
+$N$& Cholesky分解 & 高斯消元 & Matlab严格解\\
+\hline
+1 & (0) & (0) & (1)\\
+2 & $(-0.4,1)\times 10^{-15}$ & $(-1,2)\times 10^{-15}$ & (-2,6)\\
+3 & $(0.2,-1,1)\times 10^{-13}$ & $(0.2,-0.9,0.8)\times 10^{-13}$ & (3,-24,30)\\
+4 & $(0.06,-0.8,2,-1)\times 10^{-11}$ & $(0.06,-0.8,2,-1)\times 10^{-11}$ & (-4,60,-180,140)\\
+5 & $(-0.03,0.5,-2,3,-2)\times 10^{-9}$ & $(0.003,-0.3,2,-4,2)\times 10^{-10}$ & (5,-120,630,-1120,630)\\
+6 & $(-0.001,0.1,-1,4,-5,2)\times 10^{-8}$ & $(-0.01,0.3,-2,6,-7,3)\times 10^{-7}$ & (-6,210,-1680,5040,-6300,2772)\\
+\hline
+\multirow{2}*{7} & $(0.0007,-0.03,0.3,-1,$ & $(0.0004,-0.02,0.2,$ & (7,-336,3780,-16800,\\
+~ & $2,-1,0.5)\times 10^{-5}$ & $-0.6,1,0.3)\times 10^{-4}$ & 34650,-33264,12012) \\
+\hline
+\multirow{2}*{8} & $(0.0001,-0.006,0.8,-0.4,1,$ & $(0.00002,-0.002,0.02,-0.1,0.3,$ & (-8,504,-7560,46200,-138600,\\
+~ & $-2,1,-0.3)\times 10^{-2}$ & $-0.4,0.3,-0.1)\times 10^{-2}$ & 216216,-168168,51480) \\
+\hline
+\multirow{2}*{9} & $(-0.00007,0.005,-0.08,0.6,-2,$ & $(-0.00006,0.004,-0.07,0.5,-2,$ & (9,-720,13860,-110880,450450,\\
+~ & $4,-5,3,-0.8)$ & $4,-4,3,-0.6)$ & -1009008,1261260,-823680,218790) \\
+\hline
+\multirow{2}*{10} & $(0.002,-0.2,3,-31,146,-500$ & $(0.002,-0.2,4,-31,154,-521$ & (-10,990,-23760,240240,-1261260,3783780,\\
+~ & $654,-630,310,-73)$ & $691,-667,330,-77)$ & -6726720,7001280,-3938200,923780) \\
+\hline
+\end{tabular}
+\end{table}
+
+从表格可知在$N<10$的区间内二者误差数量级没有显著区别.
+
+
+\section{级数求和与截断误差}
+
+\noindent\textbf{(a)}
+
+\begin{equation}\label{4-a-1}
+\begin{aligned}
+    \mathcal{PV}\int_{|\vec{n}|\leq N}\frac{\dif^3\vec{n}}{|\vec{n}|^2-q^2}&=4\pi\mathcal{PV}\int\frac{r^2\dif r}{r^2-q^2}\\
+    &=4\pi N+4\pi\mathcal{PV}\int_0^N \frac{q^2\dif r}{r^2-q^2}\\
+    &=4\pi N+2\pi\mathcal{PV}\int_0^Nq\dif r\Big(\frac{1}{r-q}-\frac{1}{r+q}\Big)\\
+    &=4\pi N+2\pi q\Big(\int_{2q}^N\frac{\dif r}{r-q}-\int_0^N\frac{\dif r}{r+q}\Big)\\
+    &=4\pi N-2\pi q\ln\frac{N+q}{N-q}
+\end{aligned}
+\end{equation}
+
+于是直接计算有
+
+\begin{table}[H]
+    \centering
+    \caption{截断半径与值}\label{t2}
+    \begin{tabular}{|c|cccccc|}
+        \hline
+        $\Lambda$ & 500 & 1000 & 1500 & 2000 & 2500 & 3000\\
+        $f(q^2)$ & 1.07942 & 1.09745 & 1.09548 & 1.09856 & 1.10162 & 1.09957\\
+        \hline
+        $\Lambda$ & 3500 & 4000 & 4500 & 5000 & 5500 & 6000\\
+        $f(q^2)$ & 1.10176 & 1.10005 & 1.10355 & 1.10351 & 1.10347 & 1.10180\\
+        \hline
+    \end{tabular}
+\end{table}
+
+我们取$$f(q^2)\Big|_{q^2=0.5}\approx 1.10$$
+
+~\
+
+\noindent\textbf{(b)}
+
+从(表\ref{t2})上可以看出，在$\Lambda\sim 10^{3}$时只能达到$10^{-3}$的精度，并且随着$\Lambda$的增长，计算值并不是单调的，
+因此笔者认为在$\Lambda\lesssim 10^{4}$的范围内难以达到$10^{-5}$的精度，在计算到$\Lambda=6000$时耗时近4小时，而更大的半径受限于计算机算力，无法给出具体$\Lambda$在什么范围内可使精度上升到
+$10^{-5}$
+
+~\
+
+\noindent\textbf{(c)}
+
+为了利用泊松求和公式，定义
+$$F(\vec{t})=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}-\mathcal{PV}\int\dif^3\vec{n}\frac{e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}$$
+
+\begin{equation}\label{4-c-1}
+    \begin{aligned}
+        F(\vec{t})&=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}+\sum_{\vec{n}\in\mathbb{Z}^3}\frac{(1-e^{q^2-|\vec{n}|^2})e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}-\mathcal{PV}\int\frac{e^{\mathrm{i}|\vec{t}|r\cos\theta}}{r^2-q^2}r^2\dif r\sin\theta\dif\theta\dif\phi\\
+        &=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}+G(\vec{0})-\mathcal{PV}\int\frac{2\pi r\sin(|\vec{t}|r)}{r^2-q^2}\dif r\\
+        &=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}+G(\vec{0})-\frac{2\pi^2\cos(|\vec{t}|q)}{\vec{t}}
+    \end{aligned}
+\end{equation}
+
+其中$G(\vec{x})$满足
+\begin{equation}\label{4-c-2}
+    \begin{aligned}
+        G(\vec{x})&=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{(1-e^{q^2-|\vec{n}+\vec{x}|^2})e^{\mathrm{i}(\vec{n}+\vec{x})\cdot\vec{t}}}{|\vec{n}+\vec{x}|^2-q^2}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_{[0,1]^3}\frac{(1-e^{q^2-|\vec{n}+\vec{x}|^2})e^{\mathrm{i}(\vec{n}+\vec{x})\cdot\vec{t}}}{|\vec{n}+\vec{x}|^2-q^2}\dif^3\vec{x}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_{[0,1]^3}\sum_{\vec{n}\in\mathbb{Z}^3}\frac{(1-e^{q^2-|\vec{n}+\vec{x}|^2})e^{\mathrm{i}(\vec{n}+\vec{x})\cdot\vec{t}}e^{-2\mathrm{i}\pi\vec{m}\cdot\vec{x}}}{|\vec{n}+\vec{x}|^2-q^2}\dif^3\vec{x}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int\frac{(1-e^{q^2-|\vec{\tau}|^2})e^{\mathrm{i}\vec{\tau}\cdot(\vec{t}-2\pi\vec{m})}}{|\vec{\tau}|^2-q^2}\dif^3\vec{\tau}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_0^\infty\frac{(1-e^{q^2-r^2})4\pi r\sin(|2\pi\vec{m}-\vec{t}|r)}{|2\pi\vec{m}-\vec{t}|(r^2-q^2)}\dif r\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_{-\infty}^\infty\frac{(1-e^{q^2-r^2})2\pi r\sin(|2\pi\vec{m}-\vec{t}|r)}{|2\pi\vec{m}-\vec{t}|(r^2-q^2)}\dif r\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_{-\infty}^\infty \frac{2\pi r\sin(|2\pi\vec{m}-\vec{t}|r)}{|2\pi\vec{m}-\vec{t}|}\dif r\int_0^1\dif k e^{-k(r^2-q^2)}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_0^1\dif k \int_{-\infty}^\infty \frac{2\pi r\sin(|2\pi\vec{m}-\vec{t}|r)}{|2\pi\vec{m}-\vec{t}|}\dif re^{-k(r^2-q^2)}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_0^1\dif k e^{q^2k-\frac{|2\pi\vec{m}-\vec{t}|^2}{4k})}\int_{-\infty}^\infty \frac{\pi r(e^{-k(r-\frac{\mathrm{i}|2\pi\vec{m}-\vec{t}|}{2k})^2}-e^{-k(r+\frac{\mathrm{i}|2\pi\vec{m}-\vec{t}|}{2k})^2})}{\mathrm{i}|2\pi\vec{m}-\vec{t}|}\dif r\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3}e^{2\pi i\vec{m}\cdot\vec{x}}\int_0^1\dif k e^{q^2k-\frac{|2\pi\vec{m}-\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}\\
+        &=\sum_{\vec{m}\in\mathbb{Z}^3,\vec{m}\neq\vec{0}}e^{2\pi i\vec{m}\cdot\vec{x}}\int_0^1\dif k e^{q^2k-\frac{|2\pi\vec{m}-\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}+\int_0^1\dif k e^{q^2k-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}
+    \end{aligned}
+\end{equation}
+
+且又有
+\begin{equation}\label{4-c-3}
+    \int_0^\infty\dif ke^{-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}=\frac{2\pi^2}{|\vec{t}|}
+\begin{aligned}
+\end{aligned}
+\end{equation}
+
+\begin{equation}\label{4-c-4}
+    \frac{2\pi^2\cos(|\vec{t}q|)}{\vec{t}}=\frac{2\pi^2}{|\vec{t}|}+O(|\vec{t}|)=\int_0^\infty\dif ke^{-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}+O(|\vec{t}|)
+\end{equation}
+
+
+从而
+
+\begin{equation}\label{4-c-5}
+    \begin{aligned}
+    F(\vec{t})&=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}+\sum_{\vec{m}\in\mathbb{Z}^3,\vec{m}\neq\vec{0}}\int_0^1\dif k e^{q^2k-\frac{|2\pi\vec{m}-\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}+\int_0^1\dif k(e^{q^2k}-1)e^{-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}-\int_1^\infty\dif k e^{-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}\\
+    &\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}e^{\mathrm{i}\vec{n}\cdot\vec{t}}}{|\vec{n}|^2-q^2}+\sum_{\vec{m}\in\mathbb{Z}^3,\vec{m}\neq\vec{0}}\int_0^1\dif k e^{q^2k-\frac{|2\pi\vec{m}-\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}+\int_0^1\dif k(e^{q^2k}-1)e^{-\frac{|\vec{t}|^2}{4k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}-\int_0^1 2\dif \tau e^{-\frac{|\vec{t}|^2\tau}{4}}\pi^\frac{3}{2}
+    \end{aligned}
+\end{equation}
+
+$F(\vec{t})$的每一项均收敛，故而直接取极限有
+
+\begin{equation}\label{4-c-6}
+    \begin{aligned}
+    f(q^2)&=\lim_{\vec{t}\rightarrow\vec{0}}F(\vec{t})\\
+    &=\sum_{\vec{n}\in\mathbb{Z}^3}\frac{e^{q^2-|\vec{n}|^2}}{|\vec{n}|^2-q^2}+\sum_{\vec{m}\in\mathbb{Z}^3,\vec{m}\neq\vec{0}}\int_0^1\dif k e^{q^2k-\frac{\pi^2|\vec{m}|^2}{k}}\Big(\frac{\pi}{k}\Big)^\frac{3}{2}+\int_0^1\dif k(e^{q^2k}-1)\Big(\frac{\pi}{k}\Big)^\frac{3}{2}-2\pi^\frac{3}{2}
+    \end{aligned}
+\end{equation}
+
+计算在$[-5,5]^3$内求和输出为$f(q^2)_5=1.1062169758200948$，$[-9,9]^3$的结果为$f(q^2)_{9}=1.1062169758200948$，在计算机精度范围内结果没有变化，由于级数求和有个指数压低，认为在更大的范围内求和也是如此，保留六位有效数字结果为
+
+$$f(q_2)|_{q^2=0.5}=1.10622$$
+
+
+
+\end{document}

@@ -1,0 +1,3 @@
+第一题中两个QRD函数实现见Eigen.py中的HouseholderQRD和GivensQRD，第四问结果只需运行homework3.py中homework3_1_d()函数
+第二题幂次法实现见Eigen.py中的SolveMaxEigen函数，第二问结果只需运行homework3.py中homwork3_2_b()
+第三题需要在homework3.py开头更改粲偶素数据文件夹路径P，原始值为P='2pt_etac_Nconf50'，表明将50个txt文档放入2pt_etac_Nconf50的文件夹中，并让文件夹与homework3.py处与同一路径即可，后可以直接运行homework3_3()，将会输出C的相对误差表，meff的均值及其误差表，m的拟合值及其误差，以及C相对误差图像，meff散点图及其拟合区间局部放大图，C均值数据通过调用print(Cbar)即可获得.
